@@ -101,7 +101,7 @@ exports.handler = async function (event, context) {
         // 5. Configurar y enviar el correo con SendGrid
         const msg = {
             to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
-            from: 'formularios@cvtools.es', // IMPORTANTE: Usa un email que hayas verificado en tu cuenta de SendGrid
+            from: 'pablo2vbngdaw@gmail.com', // IMPORTANTE: Usa un email que hayas verificado en tu cuenta de SendGrid
             subject: `Nueva Reclamación de: ${data.empresa}`,
             text: `Se ha recibido una nueva reclamación. Los detalles están en el PDF adjunto.\n\nEmpresa: ${data.empresa}\nContacto: ${data.contacto}`,
             attachments: [
