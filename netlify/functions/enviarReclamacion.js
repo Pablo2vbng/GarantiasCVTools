@@ -2,10 +2,10 @@ const { PDFDocument, rgb } = require('pdf-lib');
 const sgMail = require('@sendgrid/mail');
 const busboy = require('busboy');
 
-// IMPORTANTE: Debes configurar tu clave de API de SendGrid en las variables de entorno de Netlify
+// La clave de API se lee de las variables de entorno de Netlify por seguridad
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// Función para parsear el formulario con imágenes
+// Función para procesar el formulario multipart/form-data
 function parseMultipartForm(event) {
     return new Promise((resolve) => {
         const fields = {};
@@ -39,24 +39,22 @@ function parseMultipartForm(event) {
     });
 }
 
-
+// Handler principal de la función serverless
 exports.handler = async function (event, context) {
     try {
         const { fields: data, files } = await parseMultipartForm(event);
 
-        // --- 1. Generar el PDF en el servidor ---
+        // 1. Crear un nuevo documento PDF
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage();
         
-        // Cargar el logo (debes tenerlo en la misma carpeta de la función o usar una ruta absoluta)
-        // Por simplicidad, omitimos el logo en el PDF del servidor. Se puede añadir con más lógica.
-        
+        // 2. Escribir la información del formulario en el PDF
         page.drawText('FORMULARIO DE RECLAMACIÓN', { x: 50, y: 750, size: 20 });
         
         let y = 700;
         const addField = (label, value) => {
-            page.drawText(`${label}: ${value}`, { x: 50, y, size: 12, color: rgb(0, 0, 0) });
-            y -= 20;
+            page.drawText(`${label}: ${value || ''}`, { x: 50, y, size: 12, color: rgb(0, 0, 0) });
+            y -= 25;
         };
 
         addField('Fecha', data.fecha);
@@ -69,28 +67,41 @@ exports.handler = async function (event, context) {
         y -= 10;
         page.drawText('Descripción del Defecto:', { x: 50, y, size: 12 });
         y -= 20;
-        page.drawText(data.defecto, { x: 50, y, size: 10 });
+        // La descripción puede ocupar varias líneas
+        page.drawText(data.defecto, { x: 50, y, size: 10, lineHeight: 15, maxWidth: 500 });
         
-        y -= 50; // Espacio para las imágenes
+        y -= 100; // Dejar espacio para las imágenes
 
+        // 3. Incrustar las imágenes (JPG o PNG)
         if (files.fotoDelantera) {
-            const img = await pdfDoc.embedJpg(files.fotoDelantera.content);
-            page.drawImage(img, { x: 50, y: y - 150, width: 200 });
+            let img;
+            if (files.fotoDelantera.contentType === 'image/jpeg') {
+                img = await pdfDoc.embedJpg(files.fotoDelantera.content);
+            } else if (files.fotoDelantera.contentType === 'image/png') {
+                img = await pdfDoc.embedPng(files.fotoDelantera.content);
+            }
+            if (img) page.drawImage(img, { x: 50, y: y, width: 200, height: 150 });
         }
+        
         if (files.fotoTrasera) {
-            const img = await pdfDoc.embedJpg(files.fotoTrasera.content);
-            page.drawImage(img, { x: 270, y: y - 150, width: 200 });
+            let img;
+            if (files.fotoTrasera.contentType === 'image/jpeg') {
+                img = await pdfDoc.embedJpg(files.fotoTrasera.content);
+            } else if (files.fotoTrasera.contentType === 'image/png') {
+                img = await pdfDoc.embedPng(files.fotoTrasera.content);
+            }
+            if (img) page.drawImage(img, { x: 270, y: y, width: 200, height: 150 });
         }
 
+        // 4. Guardar el PDF y prepararlo para el envío
         const pdfBytes = await pdfDoc.save();
-
-        // --- 2. Enviar el Correo con el PDF adjunto ---
         const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
         const fileName = `Reclamacion_${data.empresa.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
+        // 5. Configurar y enviar el correo con SendGrid
         const msg = {
             to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
-            from: 'noreply@tudominio.com', // Un email que hayas verificado en SendGrid
+            from: 'formularios@cvtools.es', // IMPORTANTE: Usa un email que hayas verificado en tu cuenta de SendGrid
             subject: `Nueva Reclamación de: ${data.empresa}`,
             text: `Se ha recibido una nueva reclamación. Los detalles están en el PDF adjunto.\n\nEmpresa: ${data.empresa}\nContacto: ${data.contacto}`,
             attachments: [
@@ -105,7 +116,7 @@ exports.handler = async function (event, context) {
 
         await sgMail.send(msg);
 
-        // --- 3. Responder al navegador que todo fue bien ---
+        // 6. Enviar respuesta de éxito al navegador
         return {
             statusCode: 200,
             body: JSON.stringify({ success: true, message: 'Reclamación enviada con éxito' }),
@@ -113,9 +124,10 @@ exports.handler = async function (event, context) {
 
     } catch (error) {
         console.error('Error en la función:', error);
+        // Enviar respuesta de error al navegador
         return {
             statusCode: 500,
-            body: JSON.stringify({ success: false, message: error.toString() }),
+            body: JSON.stringify({ success: false, message: `Error en el servidor: ${error.message}` }),
         };
     }
 };

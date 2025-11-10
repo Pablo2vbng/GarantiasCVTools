@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Reclamación</title>
+    <title>Formulario de Reclamación - Representaciones Arroyo</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -17,7 +17,6 @@
                 <h1>FORMULARIO DE GESTIÓN DE RECLAMACIONES</h1>
             </header>
             <form id="reclamacionForm">
-                <!-- Los fieldsets no cambian -->
                 <fieldset>
                     <legend>Datos del Cliente</legend>
                     <div class="campo"><label for="fecha">Fecha:</label><input type="date" id="fecha" name="fecha" required></div>
@@ -33,8 +32,8 @@
                 </fieldset>
                 <fieldset>
                     <legend>Fotografías del Producto</legend>
-                    <div class="campo-foto"><label for="fotoDelantera">Adjunta imagen 1 (Obligatoria)</label><p class="label-descripcion">Imagen que identifique el motivo de la reclamación</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoDelantera" name="fotoDelantera" accept="image/*" required><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
-                    <div class="campo-foto"><label for="fotoTrasera">Adjunta imagen 2 (Opcional)</label><p class="label-descripcion">Imagen que identifique el motivo de la reclamación</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoTrasera" name="fotoTrasera" accept="image/*"><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
+                    <div class="campo-foto"><label for="fotoDelantera">Adjunta imagen 1 (Obligatoria)</label><p class="label-descripcion">Formatos permitidos: JPG, PNG</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoDelantera" name="fotoDelantera" accept="image/jpeg, image/png" required><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
+                    <div class="campo-foto"><label for="fotoTrasera">Adjunta imagen 2 (Opcional)</label><p class="label-descripcion">Formatos permitidos: JPG, PNG</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoTrasera" name="fotoTrasera" accept="image/jpeg, image/png"><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
                 </fieldset>
                 <button type="submit" class="btn-enviar">Enviar Reclamación</button>
             </form>
@@ -57,10 +56,18 @@
     </div>
 
     <footer style="text-align: center; padding: 20px; color: #86868b;">
-        <small>Desarrollado por CV Tools, S.L.</small>
+        <small>
+            Desarrollado por CV Tools, S.L.
+            <div class="contact-info">
+                <span class="contact-item">
+                    <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z"/></svg>
+                    cvtools@cvtools.es
+                </span>
+            </div>
+            &copy; 2025 Todos los derechos reservados.
+        </small>
     </footer>
 
-    <!-- Ya no se necesita jspdf, el PDF se genera en el servidor -->
     <script src="js/main.js"></script>
 </body>
 </html>
