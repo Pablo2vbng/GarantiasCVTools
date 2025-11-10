@@ -1,0 +1,271 @@
+/* --- General Body Styling --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+    margin: 0;
+    padding: 2.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Main Container --- */
+.container {
+    background-color: #ffffff;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+}
+
+/* --- Header & Logo --- */
+header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 2rem;
+}
+
+.header-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 1.5rem;
+}
+
+.logo {
+    width: 160px;
+    height: 90px;
+    object-fit: cover;
+    border: 1px solid grey;
+    padding: 2px;
+    border-radius: 10px;
+}
+
+.upower-logo {
+    height: 50px;
+    width: auto;
+}
+
+h1 {
+    color: #000;
+    font-weight: 600;
+    font-size: 2.2rem;
+    margin: 0;
+}
+
+/* --- Fieldsets & Legends --- */
+fieldset {
+    border: none;
+    border-top: 1px solid #e5e5e5;
+    padding: 2.5rem 0 1rem 0;
+    margin-bottom: 1.5rem;
+}
+
+legend {
+    font-weight: 600;
+    color: #1d1d1f;
+    padding: 0 10px 0 0;
+    font-size: 1.5em;
+}
+
+/* --- Form Fields & Inputs --- */
+.campo { margin-bottom: 1.5rem; }
+.campo-foto { margin-bottom: 2.5rem; }
+label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 1.1em; color: #333; }
+.label-descripcion { font-size: 0.9em; color: #6e6e73; margin-top: -5px; margin-bottom: 15px; }
+
+input[type="text"], input[type="date"], input[type="tel"], textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 1em;
+    font-family: inherit;
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+    transition: all 0.2s ease-in-out;
+}
+
+input[type="text"]:focus, input[type="date"]:focus, input[type="tel"]:focus, textarea:focus {
+    outline: none;
+    border-color: #0071e3;
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+textarea { resize: vertical; min-height: 120px; }
+
+.input-ejemplo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background-color: #f5f5f7;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #dcdcdc;
+}
+
+.upload-area { flex-grow: 1; }
+input[type="file"] { width: 100%; }
+input[type="file"]::file-selector-button {
+    background-color: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: #0071e3;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 1rem;
+    transition: background-color 0.2s ease;
+}
+input[type="file"]::file-selector-button:hover { background-color: #e8e8e8; }
+.upload-success-message { color: #30d158; font-size: 0.9em; font-weight: 500; display: none; margin-top: 10px; }
+.ejemplo-wrapper { text-align: center; }
+.ejemplo-foto { width: 120px; height: 120px; border-radius: 12px; border: 1px solid #dcdcdc; object-fit: cover; display: block; }
+.ejemplo-texto { color: #6e6e73; font-size: 0.9em; font-weight: 500; margin-top: 8px; }
+
+/* --- Form Submit Button --- */
+.btn-enviar {
+    background-color: #0071e3;
+    color: #fff;
+    border: none;
+    padding: 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+.btn-enviar:hover {
+    background-color: #0077ed;
+    transform: translateY(-2px);
+}
+
+/* --- Footer --- */
+footer { text-align: center; padding: 20px 0 0 0; color: #86868b; }
+.contact-info { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px 20px; margin: 8px 0; }
+.contact-item { display: flex; align-items: center; gap: 8px; }
+.contact-icon { width: 1em; height: 1em; }
+
+
+/*
+============================================================
+--- ESTILOS DE LA PANTALLA DE CONFIRMACIÓN (CORREGIDOS) ---
+============================================================
+*/
+
+#confirmationContainer .step {
+    background-color: #f5f5f7;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    text-align: left;
+}
+
+#confirmationContainer .step h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+    color: #1d1d1f;
+    font-weight: 600;
+}
+
+#confirmationContainer .step p {
+    color: #6e6e73;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+#confirmationContainer .step p.ios-instruction {
+    font-size: 0.9em;
+    background-color: #e5edff;
+    border-left: 3px solid #0071e3;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Estilo base para TODOS los botones de la sección (<a> y <button>) */
+#confirmationContainer .btn-accion {
+    display: block;
+    width: 100%;
+    box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+    padding: 16px;
+    margin-top: 1rem;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-decoration: none; /* Quita el subrayado de los enlaces <a> */
+    text-align: center;
+    border-radius: 12px;
+    border-style: solid;
+    border-width: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Estilo para los botones principales (azules) */
+#confirmationContainer .btn-principal {
+    background-color: #0071e3;
+    color: white;
+    border-color: #0071e3;
+}
+
+#confirmationContainer .btn-principal:hover {
+    background-color: #005bb5;
+    border-color: #005bb5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
+}
+
+/* Estilo para el botón secundario (Crear otra reclamación) */
+#confirmationContainer .btn-secundario {
+    background-color: transparent;
+    color: #0071e3;
+    border-color: #0071e3;
+    margin-top: 2rem; /* Más espacio arriba */
+}
+
+#confirmationContainer .btn-secundario:hover {
+    background-color: rgba(0, 113, 227, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Texto resaltado */
+#confirmationContainer .glow {
+    color: #d63324;
+    font-weight: 700;
+}
+
+
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 600px) {
+    body { padding: 1rem 0; }
+    .container {
+        width: 100%;
+        padding: 1.5rem;
+        border-radius: 0; /* Ocupa toda la pantalla en móviles pequeños */
+        box-shadow: none;
+        border: none;
+    }
+    .header-logos { flex-direction: column; gap: 20px; }
+    .input-ejemplo { flex-direction: column; }
+    h1 { font-size: 1.8rem; }
+    legend { font-size: 1.3em; }
+}
+
+@media (min-width: 601px) {
+    .container {
+        width: 90%;
+    }
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Reclamación - Representaciones Arroyo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 1. VISTA DEL FORMULARIO -->
+        <div id="formContainer">
+            <header>
+                <div class="header-logos">
+                    <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
+                </div>
+                <h1>FORMULARIO DE GESTIÓN DE RECLAMACIONES</h1>
+            </header>
+            <form id="reclamacionForm">
+                <!-- Los fieldsets no cambian -->
+                <fieldset>
+                    <legend>Datos del Cliente</legend>
+                    <div class="campo"><label for="fecha">Fecha:</label><input type="date" id="fecha" name="fecha" required></div>
+                    <div class="campo"><label for="empresa">Empresa:</label><input type="text" id="empresa" name="empresa" required></div>
+                    <div class="campo"><label for="contacto">Persona de Contacto:</label><input type="text" id="contacto" name="contacto" required></div>
+                    <div class="campo"><label for="factura">Nº de Factura o albarán:</label><input type="text" id="factura" name="factura" required></div>
+                    <div class="campo"><label for="telefono">Teléfono de Contacto:</label><input type="tel" id="telefono" name="telefono" required></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Detalles del Producto</legend>
+                    <div class="campo"><label for="referencia">Referencia:</label><input type="text" id="referencia" name="referencia" required></div>
+                    <div class="campo"><label for="defecto">Descripción del Defecto:</label><textarea id="defecto" name="defecto" rows="4" required></textarea></div>
+                </fieldset>
+                <fieldset>
+                    <legend>Fotografías del Producto</legend>
+                    <div class="campo-foto"><label for="fotoDelantera">Adjunta imagen 1 (Obligatoria)</label><p class="label-descripcion">Imagen que identifique el motivo de la reclamación</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoDelantera" name="fotoDelantera" accept="image/*" required><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
+                    <div class="campo-foto"><label for="fotoTrasera">Adjunta imagen 2 (Opcional)</label><p class="label-descripcion">Imagen que identifique el motivo de la reclamación</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoTrasera" name="fotoTrasera" accept="image/*"><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
+                </fieldset>
+                <button type="submit" class="btn-enviar">Enviar Reclamación</button>
+            </form>
+        </div>
+
+        <!-- 2. VISTA DE CARGA (Ahora es "Enviando") -->
+        <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;">
+            <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
+            <h1>Enviando reclamación...</h1>
+            <p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p>
+        </div>
+
+        <!-- 3. VISTA DE CONFIRMACIÓN (Simplificada) -->
+        <div id="confirmationContainer" style="display: none; text-align: center;">
+            <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
+            <h1>¡Reclamación Enviada con Éxito!</h1>
+            <p>Hemos recibido tu reclamación correctamente. Nos pondremos en contacto contigo lo antes posible.</p>
+            <button id="resetButton" class="btn-accion btn-secundario">Enviar otra reclamación</button>
+        </div>
+    </div>
+
+    <footer style="text-align: center; padding: 20px; color: #86868b;">
+        <small>Desarrollado por CV Tools, S.L.</small>
+    </footer>
+
+    <!-- Ya no se necesita jspdf, el PDF se genera en el servidor -->
+    <script src="js/main.js"></script>
+</body>
+</html>
