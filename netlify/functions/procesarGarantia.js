@@ -31,7 +31,7 @@ function generatePdf(data, files) {
 
         // Cargar logos de forma segura (no detendrá la ejecución si falla)
         try {
-            const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
+            const arroyoLogoPath = path.resolve(__dirname, '../img/logo.png');
             const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
             doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
         } catch (e) {
@@ -40,7 +40,7 @@ function generatePdf(data, files) {
         }
 
         try {
-            const upowerLogoPath = path.resolve(__dirname, '../../img/logoUpower.png');
+            const upowerLogoPath = path.resolve(__dirname, '../img/logoUpower.png');
             const upowerLogoBytes = await fs.readFile(upowerLogoPath);
             doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
         } catch (e) {
