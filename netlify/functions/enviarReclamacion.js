@@ -35,7 +35,7 @@ exports.handler = async function (event, context) {
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
-        // Cargar ambos logos
+        // Cargar ambos logos desde la carpeta /img/
         try {
             // Logo de Arroyo (logo.png)
             const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
@@ -60,7 +60,7 @@ exports.handler = async function (event, context) {
             start: { x: 20, y: height - 60 }, end: { x: width - 20, y: height - 60 }, thickness: 1,
         });
 
-        // Función para dibujar campos (corregida para evitar recuadros negros)
+        // Función corregida para dibujar campos y evitar recuadros negros
         const drawField = (label, value, x, y, labelWidth, valueWidth) => {
             page.drawRectangle({ x, y, width: labelWidth, height: 20, color: rgb(0.9, 0.9, 0.9), strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
             page.drawText(label, { x: x + 5, y: y + 6, font: fontBold, size: 10, color: rgb(0, 0, 0) });
@@ -124,7 +124,7 @@ exports.handler = async function (event, context) {
 
         // Lógica de envío de correo (sin modificar)
         const msg = {
-            to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
+            to: ['pablo@cvtools.es', 'pablo@cvtools.es'],
             from: 'pablo2vbngdaw@gmail.com',
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
@@ -148,4 +148,4 @@ exports.handler = async function (event, context) {
             body: JSON.stringify({ success: false, message: `Error en el servidor: ${error.message}` }),
         };
     }
-};```
+};
