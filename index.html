@@ -38,7 +38,7 @@
                 <fieldset>
                     <legend>Fotografías Obligatorias</legend>
                     <p class="label-descripcion" style="text-align: center; font-weight: bold; color: #d63324;">
-                        IMPORTANTE: Adjunte las fotos según las instrucciones por favor.
+                        IMPORTANTE: Siga las instrucciones para subir las fotos. De lo contrario es posible que se retrase su petición. Gracias
                     </p>
                     <div class="campo-foto">
                         <label for="fotoParDelantero">1. Foto par delantero</label>
@@ -76,10 +76,29 @@
                 <button type="submit" class="btn-enviar">Enviar Garantía</button>
             </form>
         </div>
-        <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;"><img src="img/logoUpower.png" alt="Logo U-Power" class="logo"><h1>Enviando Garantía...</h1><p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p></div>
-        <div id="confirmationContainer" style="display: none; text-align: center;"><img src="img/logoUpower.png" alt="Logo U-Power" class="logo"><h1>¡Garantía Enviada con Éxito!</h1><p>Hemos recibido tu solicitud correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p><button id="resetButton" class="btn-accion btn-secundario">Enviar otra Garantía</button></div>
+
+        <!-- Vistas de Carga y Confirmación -->
+        <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;">
+            <img src="img/logoUpower.png" alt="Logo U-Power" class="logo">
+            <h1>Enviando Garantía...</h1>
+            <p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p>
+        </div>
+        <div id="confirmationContainer" style="display: none; text-align: center;">
+            <img src="img/logoUpower.png" alt="Logo U-Power" class="logo">
+            <h1>¡Garantía Enviada con Éxito!</h1>
+            <p>Hemos recibido tu solicitud correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p>
+            <button id="resetButton" class="btn-accion btn-secundario">Enviar otra Garantía</button>
+        </div>
     </div>
-    <footer style="text-align: center; padding: 20px; color: #86868b;"><small>Desarrollado por CV Tools, S.L. &copy; 2025 Todos los derechos reservados.</small></footer>
+
+    <!-- INICIO DE LA MODIFICACIÓN -->
+    <footer style="text-align: center; padding: 20px; color: #86868b;">
+        <small>
+            Powered by Pablo Vidal. pablo2vbngdaw@gmail.com Todos los derechos reservados
+        </small>
+    </footer>
+    <!-- FIN DE LA MODIFICACIÓN -->
+
     <script src="js/main.js"></script>
 </body>
 </html>

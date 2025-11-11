@@ -41,7 +41,7 @@ function generatePdf(data, files) {
             doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
         } catch (e) {
             console.error("Fallo al cargar logo.png:", e.message);
-            doc.fontSize(8).text("Logo Arroyo no encontrado", 30, 35);
+            doc.fontSize(8).text("Representaciones Arroyo", 30, 35);
         }
 
         try {
@@ -50,7 +50,7 @@ function generatePdf(data, files) {
             doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
         } catch (e) {
             console.error("Fallo al cargar logoUpower.png:", e.message);
-            doc.fontSize(8).text("Logo U-Power no encontrado", doc.page.width - 110, 35);
+            doc.fontSize(8).text("Garantías Upower", doc.page.width - 110, 35);
         }
         // --- FIN DE LA CORRECCIÓN DE RUTA ---
 
