@@ -14,7 +14,7 @@
                 <div class="header-logos">
                     <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
                 </div>
-                <h1>FORMULARIO DE GESTIÓN DE RECLAMACIONES</h1>
+                <h1>FORMULARIO DE GESTIÓN DE GARANTÍAS</h1>
             </header>
             <form id="reclamacionForm">
                 <fieldset>
@@ -22,6 +22,10 @@
                     <div class="campo"><label for="fecha">Fecha:</label><input type="date" id="fecha" name="fecha" required></div>
                     <div class="campo"><label for="empresa">Empresa:</label><input type="text" id="empresa" name="empresa" required></div>
                     <div class="campo"><label for="contacto">Persona de Contacto:</label><input type="text" id="contacto" name="contacto" required></div>
+                    
+                    <!-- CAMBIO: Campo de email añadido -->
+                    <div class="campo"><label for="email">Correo electrónico (para recibir copia):</label><input type="email" id="email" name="email" required></div>
+                    
                     <div class="campo"><label for="factura">Nº de Factura o albarán:</label><input type="text" id="factura" name="factura" required></div>
                     <div class="campo"><label for="telefono">Teléfono de Contacto:</label><input type="tel" id="telefono" name="telefono" required></div>
                 </fieldset>
@@ -39,18 +43,16 @@
             </form>
         </div>
 
-        <!-- 2. VISTA DE CARGA (Ahora es "Enviando") -->
+        <!-- VISTAS DE CARGA Y CONFIRMACIÓN (Sin cambios) -->
         <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;">
             <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
             <h1>Enviando reclamación...</h1>
             <p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p>
         </div>
-
-        <!-- 3. VISTA DE CONFIRMACIÓN (Simplificada) -->
         <div id="confirmationContainer" style="display: none; text-align: center;">
             <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
             <h1>¡Reclamación Enviada con Éxito!</h1>
-            <p>Hemos recibido tu reclamación correctamente. Nos pondremos en contacto contigo lo antes posible.</p>
+            <p>Hemos recibido tu reclamación correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p>
             <button id="resetButton" class="btn-accion btn-secundario">Enviar otra reclamación</button>
         </div>
     </div>
