@@ -116,7 +116,7 @@ exports.handler = async function (event, context) {
 
         // Lógica de envío de correo (sin modificar)
         const msg = {
-            to: ['pablo@cvtools.es'],
+            to: ['pautools46@gmail.com'],
             from: 'pablo2vbngdaw@gmail.com',
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
