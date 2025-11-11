@@ -1,16 +1,10 @@
 {
-    "name": "formulario-reclamacion",
-    "version": "1.0.0",
-    "description": "Función para procesar reclamaciones",
-    "main": "index.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-      "@sendgrid/mail": "^7.7.0",
-      "busboy": "^1.6.0",
-      "pdf-lib": "^1.17.1"
-    }
+  "name": "formulario-reclamacion",
+  "version": "1.0.0",
+  "description": "Función para procesar garantías",
+  "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "busboy": "^1.6.0",
+    "pdfkit": "^0.13.0"
   }
+}

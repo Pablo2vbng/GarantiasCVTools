@@ -1,4 +1,4 @@
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const PDFDocument = require('pdfkit');
 const sgMail = require('@sendgrid/mail');
 const busboy = require('busboy');
 const fs = require('fs').promises;
@@ -22,107 +22,102 @@ function parseMultipartForm(event) {
     });
 }
 
+// Nueva función para generar el PDF con PDFKit
+function generatePdf(data, files) {
+    return new Promise(async (resolve, reject) => {
+        const doc = new PDFDocument({ size: 'A4', margin: 30 });
+        const buffers = [];
+
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => {
+            const pdfData = Buffer.concat(buffers);
+            resolve(pdfData);
+        });
+
+        // --- DIBUJANDO EL PDF CON PDFKIT ---
+
+        // Cargar logos
+        try {
+            const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
+            const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
+            doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
+
+            const upowerLogoPath = path.resolve(__dirname, '../../img/logoUpower.png');
+            const upowerLogoBytes = await fs.readFile(upowerLogoPath);
+            doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
+        } catch (e) {
+            console.warn("Error al cargar logos:", e.message);
+        }
+
+        // Título y línea
+        doc.fontSize(18).font('Helvetica-Bold').fillColor('red').text('RECLAMACION DE GARANTÍAS', 0, 35, { align: 'center' });
+        doc.moveTo(20, 55).lineTo(doc.page.width - 20, 55).stroke();
+
+        // Función para dibujar los campos
+        const drawField = (label, value, x, y, labelWidth = 80, valueWidth = 150) => {
+            doc.rect(x, y, labelWidth, 20).fillAndStroke('#EFEFEF', '#000000');
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('black').text(label, x + 5, y + 6, { lineBreak: false });
+
+            doc.rect(x + labelWidth, y, valueWidth, 20).fillAndStroke('white', '#000000');
+            doc.fontSize(10).font('Helvetica').fillColor('black').text(value || '', x + labelWidth + 5, y + 6, { lineBreak: false });
+        };
+        
+        // Dibujar todos los campos
+        drawField('FECHA', data.fecha, 30, 80);
+        drawField('AGENTE', data.agente, 300, 80);
+        drawField('CLIENTE', data.cliente, 30, 100);
+        drawField('CONTACTO', data.contacto, 300, 100);
+
+        drawField('MODELO', data.modelo, 30, 140);
+        drawField('REF', data.referencia, 30, 160);
+        drawField('TALLA', data.talla, 30, 180);
+
+        // Descripción
+        doc.rect(300, 140, 265, 100).stroke();
+        doc.fontSize(9).font('Helvetica-Bold').text('DESCRIPCIÓN DEFECTO', 305, 128);
+        doc.fontSize(10).font('Helvetica').text(data.motivoReclamacion, 305, 145, { width: 255, align: 'left' });
+
+        // Posicionamiento de imágenes
+        const imgWidth = (doc.page.width - 90) / 2;
+        const imgHeight = imgWidth * 0.75;
+        const imgStartY = 260;
+        const imgMargin = 10;
+
+        const drawImage = (file, x, y) => {
+            if (file) {
+                try {
+                    doc.image(file.content, x, y, { fit: [imgWidth, imgHeight], align: 'center', valign: 'center' });
+                } catch (imgError) {
+                    doc.rect(x, y, imgWidth, imgHeight).stroke();
+                    doc.fontSize(8).text('Error al mostrar imagen', x + 5, y + 5);
+                    console.error("Error incrustando imagen:", imgError.message);
+                }
+            }
+        };
+
+        drawImage(files.fotoParDelantero, 30, imgStartY);
+        drawImage(files.fotoParTrasero, 30 + imgWidth + imgMargin, imgStartY);
+        drawImage(files.fotoDetalle, 30, imgStartY + imgHeight + imgMargin);
+        drawImage(files.fotoEtiqueta, 30 + imgWidth + imgMargin, imgStartY + imgHeight + imgMargin);
+
+        doc.end();
+    });
+}
+
 exports.handler = async function (event, context) {
     try {
         const { fields: data, files } = await parseMultipartForm(event);
 
-        // --- INICIO DE LA GENERACIÓN DEL PDF (VERSIÓN FINAL Y ROBUSTA) ---
-        const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage();
-        const { width, height } = page.getSize();
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        // Generar el PDF usando la nueva función con PDFKit
+        const pdfBytes = await generatePdf(data, files);
         
-        // Cargar ambos logos desde la carpeta /img/
-        try {
-            // Logo de Arroyo (logo.png)
-            const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
-            const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
-            const arroyoLogo = await pdfDoc.embedPng(arroyoLogoBytes);
-            page.drawImage(arroyoLogo, { x: 30, y: height - 50, width: 80, height: 25 });
-
-            // Logo de U-Power (logoUpower.png)
-            const upowerLogoPath = path.resolve(__dirname, '../../img/logoUpower.png');
-            const upowerLogoBytes = await fs.readFile(upowerLogoPath);
-            const upowerLogo = await pdfDoc.embedPng(upowerLogoBytes);
-            page.drawImage(upowerLogo, { x: width - 110, y: height - 50, width: 80, height: 25 });
-        } catch (e) {
-            console.warn("Error al cargar uno o ambos logos:", e.message);
-        }
-
-        // Título del PDF
-        page.drawText('RECLAMACION DE GARANTÍAS', {
-            x: width / 2, y: height - 45, font: fontBold, size: 18, color: rgb(1, 0, 0), xAlign: 'center',
-        });
-        page.drawLine({
-            start: { x: 20, y: height - 60 }, end: { x: width - 20, y: height - 60 }, thickness: 1,
-        });
-
-        // Función corregida para dibujar campos y evitar recuadros negros
-        const drawField = (label, value, x, y, labelWidth, valueWidth) => {
-            page.drawRectangle({ x, y, width: labelWidth, height: 20, color: rgb(0.9, 0.9, 0.9), strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
-            page.drawText(label, { x: x + 5, y: y + 6, font: fontBold, size: 10, color: rgb(0, 0, 0) });
-            page.drawRectangle({ x: x + labelWidth, y, width: valueWidth, height: 20, strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
-            page.drawText(value || '', { x: x + labelWidth + 5, y: y + 6, font, size: 10, color: rgb(0, 0, 0) });
-        };
-
-        // Rellenar campos del formulario en el PDF
-        let yPos = height - 90;
-        drawField('FECHA', data.fecha, 30, yPos, 80, 150);
-        drawField('AGENTE', data.agente, 300, yPos, 80, 150);
-        yPos -= 20;
-        drawField('CLIENTE', data.cliente, 30, yPos, 80, 150);
-        drawField('CONTACTO', data.contacto, 300, yPos, 80, 150);
-        
-        yPos -= 40;
-        drawField('MODELO', data.modelo, 30, yPos, 80, 150);
-        yPos -= 20;
-        drawField('REF', data.referencia, 30, yPos, 80, 150);
-        yPos -= 20;
-        drawField('TALLA', data.talla, 30, yPos, 80, 150);
-
-        // Descripción del defecto
-        const descX = 300;
-        const descY = height - 130;
-        const descWidth = 265;
-        const descHeight = 110;
-        page.drawRectangle({ x: descX, y: descY - descHeight, width: descWidth, height: descHeight, strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
-        page.drawText('DESCRIPCIÓN DEFECTO', { x: descX + 5, y: descY - 12, font: fontBold, size: 9, color: rgb(0, 0, 0) });
-        page.drawText(data.motivoReclamacion, { x: descX + 5, y: descY - 25, font, size: 10, color: rgb(0, 0, 0), lineHeight: 12, maxWidth: descWidth - 10 });
-
-        // Añadir las 4 imágenes en una cuadrícula 2x2
-        const imgWidth = (width - 90) / 2;
-        const imgHeight = imgWidth * 0.75;
-        const imgStartY = yPos - 10;
-        const imgMargin = 10;
-
-        const embedImage = async (file) => {
-            if (!file) return null;
-            if (file.contentType === 'image/jpeg') return await pdfDoc.embedJpg(file.content);
-            if (file.contentType === 'image/png') return await pdfDoc.embedPng(file.content);
-            return null;
-        };
-        
-        const img1 = await embedImage(files.fotoParDelantero);
-        if (img1) page.drawImage(img1, { x: 30, y: imgStartY - imgHeight, width: imgWidth, height: imgHeight });
-
-        const img2 = await embedImage(files.fotoParTrasero);
-        if (img2) page.drawImage(img2, { x: 30 + imgWidth + imgMargin, y: imgStartY - imgHeight, width: imgWidth, height: imgHeight });
-        
-        const img3 = await embedImage(files.fotoDetalle);
-        if (img3) page.drawImage(img3, { x: 30, y: imgStartY - (imgHeight * 2) - imgMargin, width: imgWidth, height: imgHeight });
-
-        const img4 = await embedImage(files.fotoEtiqueta);
-        if (img4) page.drawImage(img4, { x: 30 + imgWidth + imgMargin, y: imgStartY - (imgHeight * 2) - imgMargin, width: imgWidth, height: imgHeight });
-        // --- FIN DE LA SECCIÓN CORREGIDA ---
-
-        const pdfBytes = await pdfDoc.save();
-        const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
+        const pdfBase64 = pdfBytes.toString('base64');
         const fileName = `Garantia_Upower_${data.cliente.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
+        // Lógica de envío de correo (sin modificar)
         const msg = {
-            to: ['pablo@cvtools.es'],
-            from: 'pablo2vbngdaw@gmail.com',
+            to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
+            from: 'formularios@cvtools.es',
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
             attachments: [{ content: pdfBase64, filename: fileName, type: 'application/pdf', disposition: 'attachment' }],
