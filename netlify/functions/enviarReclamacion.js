@@ -6,6 +6,7 @@ const path = require('path');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+// Función para procesar el formulario (sin cambios en la lógica)
 function parseMultipartForm(event) {
     return new Promise((resolve) => {
         const fields = {};
@@ -22,114 +23,107 @@ function parseMultipartForm(event) {
     });
 }
 
+// Handler principal de la función
 exports.handler = async function (event, context) {
     try {
         const { fields: data, files } = await parseMultipartForm(event);
 
-        // --- INICIO DE LA MODIFICACIÓN DEL PDF ---
+        // --- INICIO DE LA GENERACIÓN DEL PDF PARA U-POWER ---
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage();
         const { width, height } = page.getSize();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
-        // Cargar logo de U-Power (asegúrate de que img/upower.png existe)
-        let upowerLogoBytes;
+        // Cargar logo de U-Power (asegúrate de que img/logoUpower.png existe)
         try {
-            const logoPath = path.resolve(__dirname, '../../img/upower.png');
-            upowerLogoBytes = await fs.readFile(logoPath);
-        } catch (e) {
-            console.warn("Logo upower.png no encontrado.");
-        }
-
-        if (upowerLogoBytes) {
+            const logoPath = path.resolve(__dirname, '../../img/logoUpower.png');
+            const upowerLogoBytes = await fs.readFile(logoPath);
             const upowerLogo = await pdfDoc.embedPng(upowerLogoBytes);
             page.drawImage(upowerLogo, { x: 30, y: height - 50, width: 80, height: 25 });
             page.drawImage(upowerLogo, { x: width - 110, y: height - 50, width: 80, height: 25 });
+        } catch (e) {
+            console.warn("logoUpower.png no encontrado.");
         }
 
-        // Título
+        // Título del PDF
         page.drawText('RECLAMACION DE GARANTÍAS', {
-            x: width / 2,
-            y: height - 45,
-            font: fontBold,
-            size: 18,
-            color: rgb(1, 0, 0),
-            xAlign: 'center',
+            x: width / 2, y: height - 45, font: fontBold, size: 18, color: rgb(1, 0, 0), xAlign: 'center',
         });
         page.drawLine({
-            start: { x: 20, y: height - 60 },
-            end: { x: width - 20, y: height - 60 },
-            thickness: 1,
-            color: rgb(0, 0, 0),
+            start: { x: 20, y: height - 60 }, end: { x: width - 20, y: height - 60 }, thickness: 1,
         });
 
-        // Función para dibujar los campos
+        // Función para dibujar campos con bordes
         const drawField = (label, value, x, y, labelWidth, valueWidth) => {
-            // Label Box (grey)
             page.drawRectangle({ x, y, width: labelWidth, height: 20, color: rgb(0.9, 0.9, 0.9), strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
             page.drawText(label, { x: x + 5, y: y + 6, font: fontBold, size: 10 });
-            // Value Box (white)
-            page.drawRectangle({ x: x + labelWidth, y, width: valueWidth, height: 20, color: rgb(1, 1, 1), strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
+            page.drawRectangle({ x: x + labelWidth, y, width: valueWidth, height: 20, strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
             page.drawText(value || '', { x: x + labelWidth + 5, y: y + 6, font, size: 10 });
         };
 
+        // Rellenar campos del formulario en el PDF
         let yPos = height - 90;
-        // Columna 1
         drawField('FECHA', data.fecha, 30, yPos, 80, 150);
+        drawField('AGENTE', data.agente, 300, yPos, 80, 150);
         yPos -= 20;
-        drawField('CLIENTE', data.empresa, 30, yPos, 80, 150);
-        
-        // Columna 2
-        yPos = height - 90;
-        drawField('AGENTE', 'Representaciones Arroyo', 300, yPos, 80, 150);
-        yPos -= 20;
+        drawField('CLIENTE', data.cliente, 30, yPos, 80, 150);
         drawField('CONTACTO', data.contacto, 300, yPos, 80, 150);
-
+        
         yPos -= 40;
-        // Campos de producto
-        drawField('MODELO', data.factura, 30, yPos, 80, 150); // Usamos el campo factura como "Modelo/Factura"
+        drawField('MODELO', data.modelo, 30, yPos, 80, 150);
         yPos -= 20;
         drawField('REF', data.referencia, 30, yPos, 80, 150);
         yPos -= 20;
-        drawField('TALLA', data.telefono, 30, yPos, 80, 150); // Usamos el campo teléfono como "Talla/Teléfono"
+        drawField('TALLA', data.talla, 30, yPos, 80, 150);
+
+        // CORRECCIÓN: Dibujar el cuadro de descripción sin relleno negro
+        const descX = 300;
+        const descY = height - 130;
+        const descWidth = 265;
+        const descHeight = 110;
+        page.drawRectangle({ x: descX, y: descY - descHeight, width: descWidth, height: descHeight, strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
+        page.drawText('DESCRIPCIÓN DEFECTO', { x: descX + 5, y: descY + 5, font: fontBold, size: 9 });
+        page.drawText(data.motivoReclamacion, { x: descX + 5, y: descY - 10, font, size: 10, lineHeight: 12, maxWidth: descWidth - 10 });
+
+        // Añadir las 4 imágenes en una cuadrícula 2x2
+        const imgWidth = (width - 60) / 2.2;
+        const imgHeight = imgWidth * 0.75;
+        const imgStartY = yPos - 180;
+        const imgMargin = 15;
+
+        const embedImage = async (file) => {
+            if (!file) return null;
+            if (file.contentType === 'image/jpeg') return await pdfDoc.embedJpg(file.content);
+            if (file.contentType === 'image/png') return await pdfDoc.embedPng(file.content);
+            return null;
+        };
         
-        // Descripción del defecto
-        yPos = height - 130;
-        page.drawRectangle({ x: 300, y: yPos - 100, width: 250, height: 100, strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
-        page.drawText('DESCRIPCIÓN DEFECTO', { x: 305, y: yPos + 5, font: fontBold, size: 9 });
-        page.drawText(data.defecto, { x: 305, y: yPos - 10, font, size: 10, lineHeight: 12, maxWidth: 240 });
+        const img1 = await embedImage(files.fotoParDelantero);
+        if (img1) page.drawImage(img1, { x: 30, y: imgStartY, width: imgWidth, height: imgHeight });
+
+        const img2 = await embedImage(files.fotoParTrasero);
+        if (img2) page.drawImage(img2, { x: 30 + imgWidth + imgMargin, y: imgStartY, width: imgWidth, height: imgHeight });
         
-        // Añadir imágenes
-        yPos -= 120;
-        if (files.fotoDelantera) {
-            let img;
-            if (files.fotoDelantera.contentType === 'image/jpeg') img = await pdfDoc.embedJpg(files.fotoDelantera.content);
-            else if (files.fotoDelantera.contentType === 'image/png') img = await pdfDoc.embedPng(files.fotoDelantera.content);
-            if (img) page.drawImage(img, { x: 50, y: yPos - 150, width: 200, height: 150 });
-        }
-        if (files.fotoTrasera) {
-            let img;
-            if (files.fotoTrasera.contentType === 'image/jpeg') img = await pdfDoc.embedJpg(files.fotoTrasera.content);
-            else if (files.fotoTrasera.contentType === 'image/png') img = await pdfDoc.embedPng(files.fotoTrasera.content);
-            if (img) page.drawImage(img, { x: 300, y: yPos - 150, width: 200, height: 150 });
-        }
-        // --- FIN DE LA MODIFICACIÓN DEL PDF ---
+        const img3 = await embedImage(files.fotoDetalle);
+        if (img3) page.drawImage(img3, { x: 30, y: imgStartY - imgHeight - imgMargin, width: imgWidth, height: imgHeight });
+
+        const img4 = await embedImage(files.fotoEtiqueta);
+        if (img4) page.drawImage(img4, { x: 30 + imgWidth + imgMargin, y: imgStartY - imgHeight - imgMargin, width: imgWidth, height: imgHeight });
+        // --- FIN DE LA GENERACIÓN DEL PDF ---
 
         const pdfBytes = await pdfDoc.save();
         const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
-        const fileName = `Reclamacion_${data.empresa.replace(/ /g, '_')}_${data.fecha}.pdf`;
+        const fileName = `Garantia_Upower_${data.cliente.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
-        // --- CAMBIO: AÑADIR EMAIL DEL CLIENTE EN COPIA (CC) ---
+        // Configuración del correo
         const msg = {
             to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
-            from: 'pablo2vbngdaw@gmail.com', 
-            subject: `Nueva Reclamación de: ${data.empresa}`,
-            text: `Se ha recibido una nueva reclamación. Los detalles están en el PDF adjunto.\n\nEmpresa: ${data.empresa}\nContacto: ${data.contacto}`,
+            from: 'formularios@cvtools.es',
+            subject: `Nueva Garantía U-Power de: ${data.cliente}`,
+            text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
             attachments: [{ content: pdfBase64, filename: fileName, type: 'application/pdf', disposition: 'attachment' }],
         };
-
-        // Añadimos el campo CC solo si el email es válido
         if (data.email && data.email.includes('@')) {
             msg.cc = data.email;
         }
@@ -138,7 +132,7 @@ exports.handler = async function (event, context) {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ success: true, message: 'Reclamación enviada con éxito' }),
+            body: JSON.stringify({ success: true, message: 'Garantía enviada con éxito' }),
         };
 
     } catch (error) {

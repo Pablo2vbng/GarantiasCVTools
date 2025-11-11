@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Reclamación - Representaciones Arroyo</title>
+    <title>Gestión de Garantías U-Power - Representaciones Arroyo</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,62 +12,85 @@
         <div id="formContainer">
             <header>
                 <div class="header-logos">
-                    <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
+                    <img src="img/logo.png" alt="Logo U-Power" class="logo">
+                    <img src="img/logoUpower.png" alt="Logo U-Power" class="logo">
                 </div>
-                <h1>FORMULARIO DE GESTIÓN DE GARANTÍAS</h1>
+                <h1>GESTIÓN DE GARANTÍAS DE CALZADO</h1>
             </header>
             <form id="reclamacionForm">
                 <fieldset>
-                    <legend>Datos del Cliente</legend>
+                    <legend>Datos de la Reclamación</legend>
                     <div class="campo"><label for="fecha">Fecha:</label><input type="date" id="fecha" name="fecha" required></div>
-                    <div class="campo"><label for="empresa">Empresa:</label><input type="text" id="empresa" name="empresa" required></div>
+                    <div class="campo"><label for="cliente">Cliente:</label><input type="text" id="cliente" name="cliente" required></div>
                     <div class="campo"><label for="contacto">Persona de Contacto:</label><input type="text" id="contacto" name="contacto" required></div>
-                    
-                    <!-- CAMBIO: Campo de email añadido -->
                     <div class="campo"><label for="email">Correo electrónico (para recibir copia):</label><input type="email" id="email" name="email" required></div>
-                    
-                    <div class="campo"><label for="factura">Nº de Factura o albarán:</label><input type="text" id="factura" name="factura" required></div>
-                    <div class="campo"><label for="telefono">Teléfono de Contacto:</label><input type="tel" id="telefono" name="telefono" required></div>
+                    <!-- Campo oculto para el agente -->
+                    <input type="hidden" id="agente" name="agente" value="Representaciones Arroyo">
                 </fieldset>
+                
                 <fieldset>
-                    <legend>Detalles del Producto</legend>
-                    <div class="campo"><label for="referencia">Referencia:</label><input type="text" id="referencia" name="referencia" required></div>
-                    <div class="campo"><label for="defecto">Descripción del Defecto:</label><textarea id="defecto" name="defecto" rows="4" required></textarea></div>
+                    <legend>Detalles del Calzado</legend>
+                    <div class="campo"><label for="modelo">Modelo:</label><input type="text" id="modelo" name="modelo" required></div>
+                    <div class="campo"><label for="referencia">Referencia (REF):</label><input type="text" id="referencia" name="referencia" required></div>
+                    <div class="campo"><label for="talla">Talla:</label><input type="text" id="talla" name="talla" required></div>
+                    <div class="campo"><label for="motivoReclamacion">Motivo de la Reclamación:</label><textarea id="motivoReclamacion" name="motivoReclamacion" rows="4" required></textarea></div>
                 </fieldset>
+
                 <fieldset>
-                    <legend>Fotografías del Producto</legend>
-                    <div class="campo-foto"><label for="fotoDelantera">Adjunta imagen 1 (Obligatoria)</label><p class="label-descripcion">Formatos permitidos: JPG, PNG</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoDelantera" name="fotoDelantera" accept="image/jpeg, image/png" required><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
-                    <div class="campo-foto"><label for="fotoTrasera">Adjunta imagen 2 (Opcional)</label><p class="label-descripcion">Formatos permitidos: JPG, PNG</p><div class="input-ejemplo"><div class="upload-area"><input type="file" id="fotoTrasera" name="fotoTrasera" accept="image/jpeg, image/png"><span class="upload-success-message">✓ Imagen seleccionada</span></div></div></div>
+                    <legend>Fotografías Obligatorias</legend>
+                    <div class="campo-foto">
+                        <label for="fotoParDelantero">1. Foto par delantero</label>
+                        <p class="label-descripcion">Foto del estado general del calzado, que se vea bien.</p>
+                        <div class="input-ejemplo">
+                            <div class="upload-area"><input type="file" id="fotoParDelantero" name="fotoParDelantero" accept="image/jpeg, image/png" required><span class="upload-success-message">✓ Imagen seleccionada</span></div>
+                            <div class="ejemplo-wrapper"><img src="img/parDelantero.jpg" alt="Ejemplo par delantero" class="ejemplo-foto"></div>
+                        </div>
+                    </div>
+                    <div class="campo-foto">
+                        <label for="fotoParTrasero">2. Foto par trasero</label>
+                        <p class="label-descripcion">Foto de las suelas que se pueda ver el número del zapato.</p>
+                        <div class="input-ejemplo">
+                            <div class="upload-area"><input type="file" id="fotoParTrasero" name="fotoParTrasero" accept="image/jpeg, image/png" required><span class="upload-success-message">✓ Imagen seleccionada</span></div>
+                            <div class="ejemplo-wrapper"><img src="img/parTrasero.jpg" alt="Ejemplo par trasero" class="ejemplo-foto"></div>
+                        </div>
+                    </div>
+                    <div class="campo-foto">
+                        <label for="fotoDetalle">3. Foto detalle del defecto</label>
+                        <p class="label-descripcion">Foto del defecto que se vea claro (si es interno, foto de la zona).</p>
+                        <div class="input-ejemplo">
+                            <div class="upload-area"><input type="file" id="fotoDetalle" name="fotoDetalle" accept="image/jpeg, image/png" required><span class="upload-success-message">✓ Imagen seleccionada</span></div>
+                            <div class="ejemplo-wrapper"><img src="img/fotoDetalle.jpg" alt="Ejemplo foto detalle" class="ejemplo-foto"></div>
+                        </div>
+                    </div>
+                    <div class="campo-foto">
+                        <label for="fotoEtiqueta">4. Foto etiqueta interior</label>
+                        <p class="label-descripcion">Foto de la parte de atrás de la etiqueta en la lengüeta.</p>
+                        <div class="input-ejemplo">
+                            <div class="upload-area"><input type="file" id="fotoEtiqueta" name="fotoEtiqueta" accept="image/jpeg, image/png" required><span class="upload-success-message">✓ Imagen seleccionada</span></div>
+                            <div class="ejemplo-wrapper"><img src="img/fotoEtiqueta.jpg" alt="Ejemplo foto etiqueta" class="ejemplo-foto"></div>
+                        </div>
+                    </div>
                 </fieldset>
-                <button type="submit" class="btn-enviar">Enviar Reclamación</button>
+                <button type="submit" class="btn-enviar">Enviar Garantía</button>
             </form>
         </div>
 
-        <!-- VISTAS DE CARGA Y CONFIRMACIÓN (Sin cambios) -->
+        <!-- Vistas de Carga y Confirmación -->
         <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;">
-            <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
-            <h1>Enviando reclamación...</h1>
+            <img src="img/logoUpower.png" alt="Logo U-Power" class="logo">
+            <h1>Enviando Garantía...</h1>
             <p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p>
         </div>
         <div id="confirmationContainer" style="display: none; text-align: center;">
-            <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
-            <h1>¡Reclamación Enviada con Éxito!</h1>
-            <p>Hemos recibido tu reclamación correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p>
-            <button id="resetButton" class="btn-accion btn-secundario">Enviar otra reclamación</button>
+            <img src="img/logoUpower.png" alt="Logo U-Power" class="logo">
+            <h1>¡Garantía Enviada con Éxito!</h1>
+            <p>Hemos recibido tu solicitud correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p>
+            <button id="resetButton" class="btn-accion btn-secundario">Enviar otra Garantía</button>
         </div>
     </div>
 
     <footer style="text-align: center; padding: 20px; color: #86868b;">
-        <small>
-            Desarrollado por CV Tools, S.L.
-            <div class="contact-info">
-                <span class="contact-item">
-                    <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z"/></svg>
-                    cvtools@cvtools.es
-                </span>
-            </div>
-            &copy; 2025 Todos los derechos reservados.
-        </small>
+        <small>Desarrollado por CV Tools, S.L. &copy; 2025 Todos los derechos reservados.</small>
     </footer>
 
     <script src="js/main.js"></script>
