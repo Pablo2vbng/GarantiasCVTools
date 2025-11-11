@@ -103,7 +103,7 @@ exports.handler = async function (event, context) {
 
         // --- INICIO DE LOS CAMBIOS DE CORREO ---
         const msg = {
-            to: 'pabloi@cvtools.es',               // Nuevo destinatario
+            to: 'pablo@cvtools.es',               // Nuevo destinatario
             from: 'pablo2vbngdaw@gmail.com',         // Nuevo remitente (¡DEBES VERIFICARLO!)
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
