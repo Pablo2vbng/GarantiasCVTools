@@ -22,28 +22,20 @@ function parseMultipartForm(event) {
     });
 }
 
-// Función para generar el PDF con PDFKit
 function generatePdf(data, files) {
     return new Promise(async (resolve, reject) => {
         const doc = new PDFDocument({ size: 'A4', margin: 30 });
         const buffers = [];
-
         doc.on('data', buffers.push.bind(buffers));
-        doc.on('end', () => {
-            const pdfData = Buffer.concat(buffers);
-            resolve(pdfData);
-        });
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
 
-        // --- INICIO DE LA LÓGICA DE PDF CORREGIDA ---
-
-        // Cargar logos desde la carpeta /img/.
-        // La ruta sube dos niveles desde /netlify/functions/ para llegar a la raíz del proyecto.
+        // Cargar logos de forma segura (no detendrá la ejecución si falla)
         try {
             const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
             const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
             doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
         } catch (e) {
-            console.error("ERROR: No se pudo encontrar o leer 'img/logo.png'.", e.message);
+            console.error("Fallo al cargar logo.png:", e.message);
             doc.fontSize(8).text("Logo Arroyo no encontrado", 30, 35);
         }
 
@@ -52,15 +44,13 @@ function generatePdf(data, files) {
             const upowerLogoBytes = await fs.readFile(upowerLogoPath);
             doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
         } catch (e) {
-            console.error("ERROR: No se pudo encontrar o leer 'img/logoUpower.png'.", e.message);
+            console.error("Fallo al cargar logoUpower.png:", e.message);
             doc.fontSize(8).text("Logo U-Power no encontrado", doc.page.width - 110, 35);
         }
 
-        // Título y línea
         doc.fontSize(18).font('Helvetica-Bold').fillColor('red').text('RECLAMACION DE GARANTÍAS', 0, 35, { align: 'center' });
         doc.moveTo(20, 55).lineTo(doc.page.width - 20, 55).stroke();
 
-        // Función para dibujar los campos
         const drawField = (label, value, x, y, labelWidth = 80, valueWidth = 150) => {
             doc.rect(x, y, labelWidth, 20).fillAndStroke('#EFEFEF', '#000000');
             doc.fontSize(10).font('Helvetica-Bold').fillColor('black').text(label, x + 5, y + 6, { lineBreak: false });
@@ -68,22 +58,18 @@ function generatePdf(data, files) {
             doc.fontSize(10).font('Helvetica').fillColor('black').text(value || '', x + labelWidth + 5, y + 6, { lineBreak: false });
         };
         
-        // Dibujar todos los campos
         drawField('FECHA', data.fecha, 30, 80);
         drawField('AGENTE', data.agente, 300, 80);
         drawField('CLIENTE', data.cliente, 30, 100);
         drawField('CONTACTO', data.contacto, 300, 100);
-
         drawField('MODELO', data.modelo, 30, 140);
         drawField('REF', data.referencia, 30, 160);
         drawField('TALLA', data.talla, 30, 180);
 
-        // Descripción
         doc.rect(300, 140, 265, 100).stroke();
         doc.fontSize(9).font('Helvetica-Bold').text('DESCRIPCIÓN DEFECTO', 305, 128);
         doc.fontSize(10).font('Helvetica').text(data.motivoReclamacion, 305, 145, { width: 255, align: 'left' });
 
-        // Posicionamiento de imágenes
         const imgWidth = (doc.page.width - 90) / 2;
         const imgHeight = imgWidth * 0.75;
         const imgStartY = 260;
@@ -94,8 +80,6 @@ function generatePdf(data, files) {
                 try {
                     doc.image(file.content, x, y, { fit: [imgWidth, imgHeight], align: 'center', valign: 'center' });
                 } catch (imgError) {
-                    doc.rect(x, y, imgWidth, imgHeight).stroke();
-                    doc.fontSize(8).text('Error al mostrar imagen', x + 5, y + 5);
                     console.error("Error incrustando imagen:", imgError.message);
                 }
             }
@@ -117,23 +101,24 @@ exports.handler = async function (event, context) {
         const pdfBase64 = pdfBytes.toString('base64');
         const fileName = `Garantia_Upower_${data.cliente.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
+        // --- INICIO DE LOS CAMBIOS DE CORREO ---
         const msg = {
-            to: ['pautools46@gmail.com'],
-            from: 'pablo2vbngdaw@gmail.com',
+            to: 'pabloi@cvtools.es',               // Nuevo destinatario
+            from: 'pablo2vbngdaw@gmail.com',         // Nuevo remitente (¡DEBES VERIFICARLO!)
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
             attachments: [{ content: pdfBase64, filename: fileName, type: 'application/pdf', disposition: 'attachment' }],
         };
         if (data.email && data.email.includes('@')) {
-            msg.cc = data.email;
+            msg.cc = data.email; // Se mantiene la copia al cliente
         }
+        // --- FIN DE LOS CAMBIOS DE CORREO ---
 
         await sgMail.send(msg);
 
         return { statusCode: 200, body: JSON.stringify({ success: true, message: 'Garantía enviada con éxito' }) };
-
     } catch (error) {
-        console.error('Error en la función:', error);
+        console.error('Error en la función:', error.toString());
         return { statusCode: 500, body: JSON.stringify({ success: false, message: `Error en el servidor: ${error.message}` }) };
     }
 };
