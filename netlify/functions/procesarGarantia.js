@@ -22,7 +22,7 @@ function parseMultipartForm(event) {
     });
 }
 
-// Nueva función para generar el PDF con PDFKit
+// Función para generar el PDF con PDFKit
 function generatePdf(data, files) {
     return new Promise(async (resolve, reject) => {
         const doc = new PDFDocument({ size: 'A4', margin: 30 });
@@ -34,19 +34,26 @@ function generatePdf(data, files) {
             resolve(pdfData);
         });
 
-        // --- DIBUJANDO EL PDF CON PDFKIT ---
+        // --- INICIO DE LA LÓGICA DE PDF CORREGIDA ---
 
-        // Cargar logos
+        // Cargar logos desde la carpeta /img/.
+        // La ruta sube dos niveles desde /netlify/functions/ para llegar a la raíz del proyecto.
         try {
             const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
             const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
             doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
+        } catch (e) {
+            console.error("ERROR: No se pudo encontrar o leer 'img/logo.png'.", e.message);
+            doc.fontSize(8).text("Logo Arroyo no encontrado", 30, 35);
+        }
 
+        try {
             const upowerLogoPath = path.resolve(__dirname, '../../img/logoUpower.png');
             const upowerLogoBytes = await fs.readFile(upowerLogoPath);
             doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
         } catch (e) {
-            console.warn("Error al cargar logos:", e.message);
+            console.error("ERROR: No se pudo encontrar o leer 'img/logoUpower.png'.", e.message);
+            doc.fontSize(8).text("Logo U-Power no encontrado", doc.page.width - 110, 35);
         }
 
         // Título y línea
@@ -57,7 +64,6 @@ function generatePdf(data, files) {
         const drawField = (label, value, x, y, labelWidth = 80, valueWidth = 150) => {
             doc.rect(x, y, labelWidth, 20).fillAndStroke('#EFEFEF', '#000000');
             doc.fontSize(10).font('Helvetica-Bold').fillColor('black').text(label, x + 5, y + 6, { lineBreak: false });
-
             doc.rect(x + labelWidth, y, valueWidth, 20).fillAndStroke('white', '#000000');
             doc.fontSize(10).font('Helvetica').fillColor('black').text(value || '', x + labelWidth + 5, y + 6, { lineBreak: false });
         };
@@ -107,17 +113,13 @@ function generatePdf(data, files) {
 exports.handler = async function (event, context) {
     try {
         const { fields: data, files } = await parseMultipartForm(event);
-
-        // Generar el PDF usando la nueva función con PDFKit
         const pdfBytes = await generatePdf(data, files);
-        
         const pdfBase64 = pdfBytes.toString('base64');
         const fileName = `Garantia_Upower_${data.cliente.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
-        // Lógica de envío de correo (sin modificar)
         const msg = {
-            to: ['pautools46@gmail.com'],
-            from: 'pablo2vbngdaw@gmail.com',
+            to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
+            from: 'formularios@cvtools.es',
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
             attachments: [{ content: pdfBase64, filename: fileName, type: 'application/pdf', disposition: 'attachment' }],
