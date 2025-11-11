@@ -29,13 +29,11 @@ function generatePdf(data, files) {
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', () => resolve(Buffer.concat(buffers)));
 
-        // --- INICIO DE LA MODIFICACIÓN DE RUTA ---
-        // Vamos a construir la ruta de forma más explícita desde la raíz del proyecto
-        // process.env.LAMBDA_TASK_ROOT es una variable que Netlify proporciona con la ruta del proyecto
-        const projectRoot = process.env.LAMBDA_TASK_ROOT || path.resolve(__dirname, '../../');
-
+        // --- INICIO DE LA CORRECCIÓN DE RUTA ---
+        // Usamos path.join para construir la ruta de forma segura y multiplataforma.
+        // Le decimos explícitamente que suba dos niveles desde __dirname.
         try {
-            const arroyoLogoPath = path.join(projectRoot, 'img', 'logo.png');
+            const arroyoLogoPath = path.join(__dirname, '..', '..', 'img', 'logo.png');
             const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
             doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
         } catch (e) {
@@ -44,14 +42,14 @@ function generatePdf(data, files) {
         }
 
         try {
-            const upowerLogoPath = path.join(projectRoot, 'img', 'logoUpower.png');
+            const upowerLogoPath = path.join(__dirname, '..', '..', 'img', 'logoUpower.png');
             const upowerLogoBytes = await fs.readFile(upowerLogoPath);
             doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
         } catch (e) {
             console.error("Fallo al cargar logoUpower.png:", e.message);
             doc.fontSize(8).text("Logo U-Power no encontrado", doc.page.width - 110, 35);
         }
-        // --- FIN DE LA MODIFICACIÓN DE RUTA ---
+        // --- FIN DE LA CORRECCIÓN DE RUTA ---
 
         doc.fontSize(18).font('Helvetica-Bold').fillColor('red').text('RECLAMACION DE GARANTÍAS', 0, 35, { align: 'center' });
         doc.moveTo(20, 55).lineTo(doc.page.width - 20, 55).stroke();
@@ -106,18 +104,16 @@ exports.handler = async function (event, context) {
         const pdfBase64 = pdfBytes.toString('base64');
         const fileName = `Garantia_Upower_${data.cliente.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
-        // --- INICIO DE LA MODIFICACIÓN DE CORREO ---
         const msg = {
-            to: 'pablo@cvtools.es',                  // Nuevo destinatario principal
-            from: 'pablo2vbngdaw@gmail.com',         // Remitente (recuerda que debe estar verificado en SendGrid)
+            to: 'pablo@cvtools.es',
+            from: 'pablo2vbngdaw@gmail.com',
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
             attachments: [{ content: pdfBase64, filename: fileName, type: 'application/pdf', disposition: 'attachment' }],
         };
         if (data.email && data.email.includes('@')) {
-            msg.cc = data.email; // Se mantiene la copia al cliente
+            msg.cc = data.email;
         }
-        // --- FIN DE LA MODIFICACIÓN DE CORREO ---
 
         await sgMail.send(msg);
 
