@@ -4,46 +4,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmationContainer = document.getElementById('confirmationContainer');
     const form = document.getElementById('reclamacionForm');
     
-    // --- INICIO DE LA LÓGICA DE PERSISTENCIA ---
-    // Seleccionamos todos los campos que queremos guardar
-    const formFields = form.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="tel"], textarea');
+    // --- INICIO DE LA LÓGICA DE PERSISTENCIA (VERSIÓN ROBUSTA) ---
 
-    // Función para guardar los datos en localStorage
+    // 1. Seleccionamos solo los campos de texto/datos que queremos guardar y recuperar.
+    const fieldsToPersist = form.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="tel"], textarea');
+
+    // 2. Función para guardar los datos en la memoria del navegador.
     const saveData = () => {
-        formFields.forEach(field => {
-            localStorage.setItem(field.id, field.value);
-        });
+        try {
+            fieldsToPersist.forEach(field => {
+                localStorage.setItem(field.id, field.value);
+            });
+            console.log("Datos del formulario guardados en localStorage.");
+        } catch (e) {
+            console.error("No se pudo guardar en localStorage. Puede que el modo incógnito esté activo.", e);
+        }
     };
 
-    // Función para cargar los datos desde localStorage
+    // 3. Función para cargar los datos al iniciar la página.
     const loadData = () => {
-        formFields.forEach(field => {
-            const savedValue = localStorage.getItem(field.id);
-            if (savedValue) {
-                field.value = savedValue;
-            }
-        });
+        try {
+            fieldsToPersist.forEach(field => {
+                const savedValue = localStorage.getItem(field.id);
+                if (savedValue) {
+                    field.value = savedValue;
+                }
+            });
+            console.log("Datos del formulario recuperados de localStorage.");
+        } catch (e) {
+            console.error("No se pudo leer de localStorage.", e);
+        }
     };
     
-    // Función para borrar los datos guardados
+    // 4. Función para limpiar la memoria después de un envío exitoso.
     const clearData = () => {
-        formFields.forEach(field => {
-            localStorage.removeItem(field.id);
-        });
+        try {
+            fieldsToPersist.forEach(field => {
+                localStorage.removeItem(field.id);
+            });
+            console.log("localStorage limpiado.");
+        } catch (e) {
+            console.error("No se pudo limpiar localStorage.", e);
+        }
     };
 
-    // Cada vez que el usuario escribe algo, guardamos los datos
-    formFields.forEach(field => {
-        field.addEventListener('input', saveData);
+    // 5. CAMBIO CRUCIAL: Escuchamos el evento 'change' en TODOS los campos (incluidos los de archivo).
+    // Esto es más fiable que 'input' y se activa al seleccionar una foto.
+    const allFormElements = form.querySelectorAll('input, textarea');
+    allFormElements.forEach(element => {
+        element.addEventListener('change', saveData);
     });
 
-    // Al cargar la página, intentamos recuperar los datos
+    // 6. Al cargar la página, recuperamos cualquier dato que hubiera.
     loadData();
     // --- FIN DE LA LÓGICA DE PERSISTENCIA ---
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-
         formContainer.style.display = 'none';
         loadingContainer.style.display = 'block';
 
@@ -54,15 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData,
             });
-
             const result = await response.json();
 
             if (!response.ok || !result.success) {
                 throw new Error(result.message || 'Error desconocido en el servidor.');
             }
             
-            // Si el envío es exitoso, borramos los datos guardados
-            clearData();
+            clearData(); // Limpiamos solo si el envío es exitoso.
 
             loadingContainer.style.display = 'none';
             confirmationContainer.style.display = 'block';
@@ -70,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al enviar el formulario:', error);
             alert(`Hubo un problema al enviar la reclamación: ${error.message}`);
-            // Si hay un error, no borramos los datos para que el usuario no los pierda
             loadingContainer.style.display = 'none';
             formContainer.style.display = 'block';
         }
@@ -78,8 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetButton = document.getElementById('resetButton');
     resetButton.addEventListener('click', () => {
-        // Al crear una nueva reclamación, borramos los datos antes de recargar
-        clearData();
+        clearData(); // Limpiamos antes de recargar.
         window.location.reload();
     });
 
