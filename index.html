@@ -11,12 +11,10 @@
         <!-- 1. VISTA DEL FORMULARIO -->
         <div id="formContainer">
             <header>
-                <!-- INICIO DE LA MODIFICACIÓN -->
                 <div class="header-logos">
                     <img src="img/logoUpower.png" alt="Logo U-Power" class="logo">
                     <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
                 </div>
-                <!-- FIN DE LA MODIFICACIÓN -->
                 <h1>GESTIÓN DE GARANTÍAS DE CALZADO</h1>
             </header>
             <form id="reclamacionForm">
@@ -26,7 +24,6 @@
                     <div class="campo"><label for="cliente">Cliente:</label><input type="text" id="cliente" name="cliente" required></div>
                     <div class="campo"><label for="contacto">Persona de Contacto:</label><input type="text" id="contacto" name="contacto" required></div>
                     <div class="campo"><label for="email">Correo electrónico (para recibir copia):</label><input type="email" id="email" name="email" required></div>
-                    <!-- Campo oculto para el agente -->
                     <input type="hidden" id="agente" name="agente" value="Representaciones Arroyo">
                 </fieldset>
                 
@@ -40,6 +37,9 @@
 
                 <fieldset>
                     <legend>Fotografías Obligatorias</legend>
+                    <p class="label-descripcion" style="text-align: center; font-weight: bold; color: #d63324;">
+                        IMPORTANTE: Si las fotos son muy pesadas, el envío puede tardar o fallar. Intente que no ocupen demasiado.
+                    </p>
                     <div class="campo-foto">
                         <label for="fotoParDelantero">1. Foto par delantero</label>
                         <p class="label-descripcion">Foto del estado general del calzado, que se vea bien.</p>
@@ -76,25 +76,10 @@
                 <button type="submit" class="btn-enviar">Enviar Garantía</button>
             </form>
         </div>
-
-        <!-- Vistas de Carga y Confirmación -->
-        <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;">
-            <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
-            <h1>Enviando Garantía...</h1>
-            <p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p>
-        </div>
-        <div id="confirmationContainer" style="display: none; text-align: center;">
-            <img src="img/logo.png" alt="Logo Representaciones Arroyo" class="logo">
-            <h1>¡Garantía Enviada con Éxito!</h1>
-            <p>Hemos recibido tu solicitud correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p>
-            <button id="resetButton" class="btn-accion btn-secundario">Enviar otra Garantía</button>
-        </div>
+        <div id="loadingContainer" style="display: none; text-align: center; padding: 4rem;"><img src="img/logoUpower.png" alt="Logo U-Power" class="logo"><h1>Enviando Garantía...</h1><p>Este proceso es automático y puede tardar unos segundos. Por favor, espera.</p></div>
+        <div id="confirmationContainer" style="display: none; text-align: center;"><img src="img/logoUpower.png" alt="Logo U-Power" class="logo"><h1>¡Garantía Enviada con Éxito!</h1><p>Hemos recibido tu solicitud correctamente. Recibirás una copia en tu correo. Nos pondremos en contacto contigo lo antes posible.</p><button id="resetButton" class="btn-accion btn-secundario">Enviar otra Garantía</button></div>
     </div>
-
-    <footer style="text-align: center; padding: 20px; color: #86868b;">
-        <small>Desarrollado por CV Tools, S.L. &copy; 2025 Todos los derechos reservados.</small>
-    </footer>
-
+    <footer style="text-align: center; padding: 20px; color: #86868b;"><small>Desarrollado por CV Tools, S.L. &copy; 2025 Todos los derechos reservados.</small></footer>
     <script src="js/main.js"></script>
 </body>
 </html>

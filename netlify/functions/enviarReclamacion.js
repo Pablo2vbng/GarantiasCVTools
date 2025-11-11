@@ -6,7 +6,6 @@ const path = require('path');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// Función para procesar el formulario (esta parte no se toca, funciona bien)
 function parseMultipartForm(event) {
     return new Promise((resolve) => {
         const fields = {};
@@ -23,36 +22,30 @@ function parseMultipartForm(event) {
     });
 }
 
-// Handler principal de la función
 exports.handler = async function (event, context) {
     try {
         const { fields: data, files } = await parseMultipartForm(event);
 
-        // --- INICIO DE LA SECCIÓN CORREGIDA PARA GENERAR EL PDF ---
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage();
         const { width, height } = page.getSize();
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
         
-        // Cargar ambos logos desde la carpeta /img/
         try {
-            // Logo de Arroyo (logo.png)
             const arroyoLogoPath = path.resolve(__dirname, '../../img/logo.png');
             const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
             const arroyoLogo = await pdfDoc.embedPng(arroyoLogoBytes);
             page.drawImage(arroyoLogo, { x: 30, y: height - 50, width: 80, height: 25 });
 
-            // Logo de U-Power (logoUpower.png)
             const upowerLogoPath = path.resolve(__dirname, '../../img/logoUpower.png');
             const upowerLogoBytes = await fs.readFile(upowerLogoPath);
             const upowerLogo = await pdfDoc.embedPng(upowerLogoBytes);
             page.drawImage(upowerLogo, { x: width - 110, y: height - 50, width: 80, height: 25 });
         } catch (e) {
-            console.warn("Error al cargar uno o ambos logos:", e.message);
+            console.warn("Error al cargar logos:", e.message);
         }
 
-        // Título del PDF
         page.drawText('RECLAMACION DE GARANTÍAS', {
             x: width / 2, y: height - 45, font: fontBold, size: 18, color: rgb(1, 0, 0), xAlign: 'center',
         });
@@ -60,7 +53,6 @@ exports.handler = async function (event, context) {
             start: { x: 20, y: height - 60 }, end: { x: width - 20, y: height - 60 }, thickness: 1,
         });
 
-        // Función corregida para dibujar campos y evitar recuadros negros
         const drawField = (label, value, x, y, labelWidth, valueWidth) => {
             page.drawRectangle({ x, y, width: labelWidth, height: 20, color: rgb(0.9, 0.9, 0.9), strokeColor: rgb(0, 0, 0), borderWidth: 0.5 });
             page.drawText(label, { x: x + 5, y: y + 6, font: fontBold, size: 10, color: rgb(0, 0, 0) });
@@ -68,7 +60,6 @@ exports.handler = async function (event, context) {
             page.drawText(value || '', { x: x + labelWidth + 5, y: y + 6, font, size: 10, color: rgb(0, 0, 0) });
         };
 
-        // Rellenar campos del formulario en el PDF
         let yPos = height - 90;
         drawField('FECHA', data.fecha, 30, yPos, 80, 150);
         drawField('AGENTE', data.agente, 300, yPos, 80, 150);
@@ -83,7 +74,6 @@ exports.handler = async function (event, context) {
         yPos -= 20;
         drawField('TALLA', data.talla, 30, yPos, 80, 150);
 
-        // Descripción del defecto (corregido para que no sea un recuadro negro)
         const descX = 300;
         const descY = height - 130;
         const descWidth = 265;
@@ -92,7 +82,6 @@ exports.handler = async function (event, context) {
         page.drawText('DESCRIPCIÓN DEFECTO', { x: descX + 5, y: descY - 12, font: fontBold, size: 9, color: rgb(0, 0, 0) });
         page.drawText(data.motivoReclamacion, { x: descX + 5, y: descY - 25, font, size: 10, color: rgb(0, 0, 0), lineHeight: 12, maxWidth: descWidth - 10 });
 
-        // Añadir las 4 imágenes en una cuadrícula 2x2
         const imgWidth = (width - 90) / 2;
         const imgHeight = imgWidth * 0.75;
         const imgStartY = yPos - 10;
@@ -116,15 +105,13 @@ exports.handler = async function (event, context) {
 
         const img4 = await embedImage(files.fotoEtiqueta);
         if (img4) page.drawImage(img4, { x: 30 + imgWidth + imgMargin, y: imgStartY - (imgHeight * 2) - imgMargin, width: imgWidth, height: imgHeight });
-        // --- FIN DE LA SECCIÓN CORREGIDA ---
 
         const pdfBytes = await pdfDoc.save();
         const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
         const fileName = `Garantia_Upower_${data.cliente.replace(/ /g, '_')}_${data.fecha}.pdf`;
 
-        // Lógica de envío de correo (sin modificar)
         const msg = {
-            to: ['pablo@cvtools.es', 'pablo@cvtools.es'],
+            to: ['pablo@cvtools.es'],
             from: 'pablo2vbngdaw@gmail.com',
             subject: `Nueva Garantía U-Power de: ${data.cliente}`,
             text: `Se ha recibido una nueva solicitud de garantía. Los detalles están en el PDF adjunto.\n\nCliente: ${data.cliente}\nContacto: ${data.contacto}`,
@@ -136,16 +123,10 @@ exports.handler = async function (event, context) {
 
         await sgMail.send(msg);
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ success: true, message: 'Garantía enviada con éxito' }),
-        };
+        return { statusCode: 200, body: JSON.stringify({ success: true, message: 'Garantía enviada con éxito' }) };
 
     } catch (error) {
         console.error('Error en la función:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ success: false, message: `Error en el servidor: ${error.message}` }),
-        };
+        return { statusCode: 500, body: JSON.stringify({ success: false, message: `Error en el servidor: ${error.message}` }) };
     }
 };
