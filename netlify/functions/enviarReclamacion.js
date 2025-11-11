@@ -123,7 +123,7 @@ exports.handler = async function (event, context) {
         // --- CAMBIO: AÑADIR EMAIL DEL CLIENTE EN COPIA (CC) ---
         const msg = {
             to: ['cvtools@cvtools.es', 'pablo@cvtools.es'],
-            from: 'formularios@cvtools.es', 
+            from: 'pablo2vbngdaw@gmail.com', 
             subject: `Nueva Reclamación de: ${data.empresa}`,
             text: `Se ha recibido una nueva reclamación. Los detalles están en el PDF adjunto.\n\nEmpresa: ${data.empresa}\nContacto: ${data.contacto}`,
             attachments: [{ content: pdfBase64, filename: fileName, type: 'application/pdf', disposition: 'attachment' }],
