@@ -29,11 +29,14 @@ function generatePdf(data, files) {
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', () => resolve(Buffer.concat(buffers)));
 
-        // --- INICIO DE LA CORRECCIÓN DE RUTA ---
-        // Usamos path.join para construir la ruta de forma segura y multiplataforma.
-        // Le decimos explícitamente que suba dos niveles desde __dirname.
+        // --- INICIO DE LA CORRECCIÓN DEFINITIVA DE RUTA ---
+        // Netlify proporciona una variable de entorno que apunta a la raíz del proyecto.
+        // Esto es mucho más fiable que una ruta relativa.
+        const projectRoot = process.env.LAMBDA_TASK_ROOT;
+
         try {
-            const arroyoLogoPath = path.join(__dirname, '..', '..', 'img', 'logo.png');
+            // Construimos la ruta absoluta desde la raíz del proyecto
+            const arroyoLogoPath = path.join(projectRoot, 'img', 'logo.png');
             const arroyoLogoBytes = await fs.readFile(arroyoLogoPath);
             doc.image(arroyoLogoBytes, 30, 25, { width: 80 });
         } catch (e) {
@@ -42,7 +45,7 @@ function generatePdf(data, files) {
         }
 
         try {
-            const upowerLogoPath = path.join(__dirname, '..', '..', 'img', 'logoUpower.png');
+            const upowerLogoPath = path.join(projectRoot, 'img', 'logoUpower.png');
             const upowerLogoBytes = await fs.readFile(upowerLogoPath);
             doc.image(upowerLogoBytes, doc.page.width - 110, 25, { width: 80 });
         } catch (e) {
